@@ -1,10 +1,30 @@
-// import MyCurrentLocation, {name, meesage, getGreeting} from './myModule';
-// console.log({MyCurrentLocation, name, meesage});
-// console.log(getGreeting(name));
+import {createServer} from "@graphql-yoga/node"
 
-import add, { subtract } from "./math";
+const typeDefs = `
+    type Query {
+        hello: String!
+        name: String!
+        location: String!
+        bio: String!
+    }
+`
 
-const sum = add(1,1);
-const diff = subtract(1,1);
+const resolvers = {
+    Query: {
+        hello: () => 'Hello everyone!',
+        name: () => 'Jerald Sayson',
+        location: () => 'Cebu City',
+        bio: () => 'I am a junior web developer!'
+    }
+}
 
-console.log({sum,diff});
+const server = createServer({
+    schema: {
+        typeDefs,
+        resolvers
+    }
+})
+
+server.start(() => {
+    console.log("The server is running");
+})
