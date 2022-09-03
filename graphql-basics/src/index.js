@@ -58,19 +58,23 @@ const postData = [
 const commentData = [
     {
         id: 100,
-        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
+        author: '1'
     },
     {
         id: 101,
-        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
+        author: '3'
     },
     {
         id: 102,
-        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
+        author: '3'    
     },
     {
         id: 103,
-        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
+        author: '2'
     },
 ]
 
@@ -89,6 +93,7 @@ const typeDefs = `
         email: String!
         age: Int!
         posts: [Post!]!
+        comments: [Comment!]!
     }
 
     type Post {
@@ -100,8 +105,9 @@ const typeDefs = `
     }
     
     type Comment {
-        id: ID!,
+        id: ID!
         textField: String!
+        author: User!
     }
 `
 
@@ -153,12 +159,24 @@ const resolvers = {
             return usersData.find((user) => {
                 return user.id === parent.author;
             })
-        }
+        },
     },
     User: {
         posts: (parent) => {
             return postData.filter((post) => {
                 return post.author === parent.id;
+            })
+        },
+        comments: (parent) => {
+            return commentData.filter((comment)=> {
+                return comment.author === parent.id;
+            })
+        }
+    },
+    Comment: {
+        author: (parent) => {
+            return usersData.find((user) => {
+                return user.id === parent.author;
             })
         }
     }
