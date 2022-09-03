@@ -5,21 +5,43 @@ import {v4 as randomID} from 'uuid'
 
 const typeDefs = `
     type Query {
+        post: Post!
+        user: User!
+    }
+
+    type User {
         id: ID!
         name: String!
+        email: String!
         age: Int!
-        employed: Boolean!
-        gpa: Float 
+    }
+
+    type Post {
+        id: ID!
+        title: String!
+        body: String!
+        published: String!
     }
 `
 
 const resolvers = {
     Query: {
-        id: () => randomID(),
-        name: () => 'Jerald Sayson',
-        age: () => 34,
-        employed:() => false,
-        gpa: () => null
+        post: () => {
+            return {
+                id: randomID(),
+                title: 'The Art of War',
+                body: 'This is the introduction of the Art of War by Tsu-chan',
+                published: 2008
+            }
+        },
+        user: () => {
+            return {
+                id: randomID(),
+                name: 'Jerald Sayson',
+                email: 'example@gmail.com',
+                age: 34
+            }
+        }
     }
 }
 
@@ -27,7 +49,8 @@ const server = createServer({
     schema: {
         typeDefs,
         resolvers
-    }
+    },
+    port: 3456
 })
 
 server.start(() => {
