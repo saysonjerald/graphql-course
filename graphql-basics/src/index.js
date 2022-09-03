@@ -53,14 +53,34 @@ const postData = [
         published: "12-02-2014",
         author: '3'
     }
+];
+
+const commentData = [
+    {
+        id: 100,
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+    },
+    {
+        id: 101,
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+    },
+    {
+        id: 102,
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+    },
+    {
+        id: 103,
+        textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!"
+    },
 ]
 
 const typeDefs = `
     type Query {
-        users(query: String): [User!]!
-        posts(query: String): [Post!]!
         post: Post!
         user: User!
+        users(query: String): [User!]!
+        posts(query: String): [Post!]!
+        comments: [Comment!]!
     }
 
     type User {
@@ -78,21 +98,22 @@ const typeDefs = `
         published: String!
         author: User!
     }
+    
+    type Comment {
+        id: ID!,
+        textField: String!
+    }
 `
 
 const resolvers = {
     Query: {
-        posts: (parent, arg) => {
-            if(!arg.query) {
-                return postData;
+        user: () => {
+            return {
+                id: randomID(),
+                name: 'Jerald Sayson',
+                email: 'example@gmail.com',
+                age: 34
             }
-
-            return postData.filter((post) => {
-                const isPost =  post.title.toLowerCase().includes(arg.query.toLowerCase());
-                const isBody =  post.body.toLowerCase().includes(arg.query.toLowerCase());
-
-                return isPost || isBody;
-            })
         },
         users: (parent, arg) => {
             if(!arg.query) {
@@ -111,13 +132,20 @@ const resolvers = {
                 published: 2008,
             }
         },
-        user: () => {
-            return {
-                id: randomID(),
-                name: 'Jerald Sayson',
-                email: 'example@gmail.com',
-                age: 34
+        posts: (parent, arg) => {
+            if(!arg.query) {
+                return postData;
             }
+
+            return postData.filter((post) => {
+                const isPost =  post.title.toLowerCase().includes(arg.query.toLowerCase());
+                const isBody =  post.body.toLowerCase().includes(arg.query.toLowerCase());
+
+                return isPost || isBody;
+            })
+        },
+        comments: (parent, arg) => {
+            return commentData;
         }
     },
     Post: {
