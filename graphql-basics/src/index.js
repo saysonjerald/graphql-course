@@ -3,13 +3,61 @@ import {v4 as randomID} from 'uuid'
 
 // Scalar Types: Strings, Boolean, Int, Float, ID, - can store single value
 
+const usersData = [
+    {
+        id: randomID(),
+        name: 'Jerald Sayson',
+        email: 'example@gmail.com',
+        age: 27,
+    },
+    {
+        id: randomID(),
+        name: 'Ian Nogas',
+        email: 'example@gmail.com',
+        age: 21,
+    },
+    {
+        id: randomID(),
+        name: 'Eugene Mosqueda',
+        email: 'example@gmail.com',
+        age: 26,
+    },
+    {
+        id: randomID(),
+        name: 'Roberto Dallas',
+        email: 'example@gmail.com',
+        age: 72,
+    },
+
+] 
+
+const postData = [
+    {
+        id: randomID(),
+        title: 'Art of War',
+        body: 'This is the introduction of the art of war',
+        published: "06-02-1934"
+    },
+    {
+        id: randomID(),
+        title: 'The Lorem Ipsum',
+        body:  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus consequuntur ut, eaque veritatis tenetur expedita facilis necessitatibus odio nulla quam.",
+        published: "07-02-1943"
+    },
+    {
+        id: randomID(),
+        title: 'The Read Power of Low',
+        body: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea, accusamus!",
+        published: "12-02-2014"
+    }
+]
+
 const typeDefs = `
     type Query {
+        users(query: String): [User!]!
+        posts(query: String): [Post!]!
         post: Post!
         user: User!
-        greetings(name:String): String!
-        add(a: Float!, b: Float!): Float!
-        multiply(numbers: [Float!]!): Float!
     }
 
     type User {
@@ -29,6 +77,27 @@ const typeDefs = `
 
 const resolvers = {
     Query: {
+        posts: (parent, arg) => {
+            if(!arg.query) {
+                return postData;
+            }
+
+            return postData.filter((post) => {
+                const isPost =  post.title.toLowerCase().includes(arg.query.toLowerCase());
+                const isBody =  post.body.toLowerCase().includes(arg.query.toLowerCase());
+
+                return isPost || isBody;
+            })
+        },
+        users: (parent, arg) => {
+            if(!arg.query) {
+                return usersData;
+            }
+
+            return usersData.filter((user)=> {
+                return user.name.toLowerCase().includes(arg.query.toLowerCase());
+            })
+        },
         post: () => {
             return {
                 id: randomID(),
@@ -44,22 +113,6 @@ const resolvers = {
                 email: 'example@gmail.com',
                 age: 34
             }
-        },
-        greetings: (parent, arg, ctx, info) => {
-            return arg.name ? `Hello ${arg.name}`: 'Hello'
-        },
-        add: (parent, arg) => {
-            const {a, b} = arg;
-            return a + b;
-        },
-        multiply: (parent, arg) => {
-            if(!arg.numbers.length) {
-                return 0;
-            }
-
-            return arg.numbers.reduce((accumulator, currentValue)=> {
-                return accumulator * currentValue;
-            })
         }
     }
 }
