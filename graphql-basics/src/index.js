@@ -7,6 +7,8 @@ const typeDefs = `
     type Query {
         post: Post!
         user: User!
+        greetings(name:String): String!
+        add(a: Float!, b: Float!): Float!
     }
 
     type User {
@@ -41,6 +43,13 @@ const resolvers = {
                 email: 'example@gmail.com',
                 age: 34
             }
+        },
+        greetings: (parent, arg, ctx, info) => {
+            return arg.name ? `Hello ${arg.name}`: 'Hello'
+        },
+        add: (parent, arg) => {
+            const {a, b} = arg;
+            return a + b;
         }
     }
 }
