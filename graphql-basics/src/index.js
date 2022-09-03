@@ -33,21 +33,21 @@ const usersData = [
 
 const postData = [
     {
-        id: randomID(),
+        id: '201',
         title: 'Art of War',
         body: 'This is the introduction of the art of war',
         published: "06-02-1934",
         author: '1'
     },
     {
-        id: randomID(),
+        id: '202',
         title: 'The Lorem Ipsum',
         body:  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus consequuntur ut, eaque veritatis tenetur expedita facilis necessitatibus odio nulla quam.",
         published: "07-02-1943",
         author: '2'
     },
     {
-        id: randomID(),
+        id: '203',
         title: 'The Read Power of Low',
         body: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea, accusamus!",
         published: "12-02-2014",
@@ -59,22 +59,26 @@ const commentData = [
     {
         id: 100,
         textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
-        author: '1'
+        author: '1',
+        post: '201'
     },
     {
         id: 101,
         textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
-        author: '3'
+        author: '3',
+        post: '203'
     },
     {
         id: 102,
         textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
-        author: '3'    
+        author: '3',
+        post: '202'
     },
     {
         id: 103,
         textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
-        author: '2'
+        author: '2',
+        post: '203'
     },
 ]
 
@@ -102,12 +106,14 @@ const typeDefs = `
         body: String!
         published: String!
         author: User!
+        comments: [Comment!]!
     }
     
     type Comment {
         id: ID!
         textField: String!
         author: User!
+        post: Post!
     }
 `
 
@@ -160,6 +166,11 @@ const resolvers = {
                 return user.id === parent.author;
             })
         },
+        comments: (parent) => {
+            return commentData.filter((comment) => {
+                return comment.post === parent.id;
+            })
+        }
     },
     User: {
         posts: (parent) => {
@@ -177,6 +188,11 @@ const resolvers = {
         author: (parent) => {
             return usersData.find((user) => {
                 return user.id === parent.author;
+            })
+        },
+        post: (parent) => {
+            return postData.find((post)=> {
+                return post.id === parent.post;
             })
         }
     }
