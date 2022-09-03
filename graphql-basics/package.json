@@ -13,6 +13,7 @@
     "@graphql-yoga/node": "^2.13.12",
     "babel-cli": "^6.26.0",
     "babel-preset-env": "^1.7.0",
-    "graphql": "^16.6.0"
+    "graphql": "^16.6.0",
+    "uuid": "^8.3.2"
   }
 }

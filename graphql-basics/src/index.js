@@ -1,20 +1,25 @@
 import {createServer} from "@graphql-yoga/node"
+import {v4 as randomID} from 'uuid'
+
+// Scalar Types: Strings, Boolean, Int, Float, ID, - can store single value
 
 const typeDefs = `
     type Query {
-        hello: String!
+        id: ID!
         name: String!
-        location: String!
-        bio: String!
+        age: Int!
+        employed: Boolean!
+        gpa: Float 
     }
 `
 
 const resolvers = {
     Query: {
-        hello: () => 'Hello everyone!',
+        id: () => randomID(),
         name: () => 'Jerald Sayson',
-        location: () => 'Cebu City',
-        bio: () => 'I am a junior web developer!'
+        age: () => 34,
+        employed:() => false,
+        gpa: () => null
     }
 }
 
