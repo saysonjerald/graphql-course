@@ -9,6 +9,7 @@ const typeDefs = `
         user: User!
         greetings(name:String): String!
         add(a: Float!, b: Float!): Float!
+        multiply(numbers: [Float!]!): Float!
     }
 
     type User {
@@ -50,6 +51,15 @@ const resolvers = {
         add: (parent, arg) => {
             const {a, b} = arg;
             return a + b;
+        },
+        multiply: (parent, arg) => {
+            if(!arg.numbers.length) {
+                return 0;
+            }
+
+            return arg.numbers.reduce((accumulator, currentValue)=> {
+                return accumulator * currentValue;
+            })
         }
     }
 }
