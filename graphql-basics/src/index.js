@@ -91,10 +91,30 @@ const typeDefs = `
         comments: [Comment!]!
     }
 
+    
+    input CreateUserInput {
+        name: String!
+        email: String!
+        age: Int!
+    }
+
+    input CreatePostInput {
+        title: String!
+        body: String!
+        published: Boolean!
+        author: ID!
+    }
+
+    input CreateCommentInput {
+        textField: String! 
+        author: ID! 
+        post: ID!
+    }
+
     type Mutation {
-        createUser(name: String!, email: String!, age: Int!): User!
-        createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
-        createComment(textField: String!, author: ID!, post: ID!): Comment!
+        createUser(data: CreateUserInput): User!
+        createPost(data: CreatePostInput): Post!
+        createComment(data: CreateCommentInput): Comment!
     }
 
     type User {
@@ -168,7 +188,7 @@ const resolvers = {
     },
     Mutation: {
         createUser: (parent, arg, ctx, info) => {
-            const isUserExist = usersData.some((user)=> user.email === arg.email);
+            const isUserExist = usersData.some((user)=> user.email === arg.data.email);
 
             if(isUserExist) {
                 throw new GraphQLYogaError("User already exist 😢.");
@@ -176,9 +196,7 @@ const resolvers = {
 
             const user = {
                 id: randomID(),
-                name: arg.name,
-                email: arg.email,
-                age: arg.age,
+                ...arg.data,
             }
 
             usersData.push(user);
@@ -192,10 +210,7 @@ const resolvers = {
             
             const post = {
                 id: randomID(),
-                title: arg.title,
-                body: arg.body,
-                published: arg.published,
-                author: arg.author
+                ...arg
             }
 
             postData.push(post);
@@ -203,9 +218,9 @@ const resolvers = {
             return post;
         },
         createComment: (parent, arg) => {
-            const isAuthorExist = usersData.some((user) => user.id ===  arg.author);
+            const isAuthorExist = usersData.some((user) => user.id ===  arg.data.author);
             const isPostExist = postData.some((post) => {
-                return post.published && post.id === arg.post;
+                return post.published && post.id === arg.data.post;
             });
 
             if(!isAuthorExist) {
@@ -218,9 +233,7 @@ const resolvers = {
            
             const comment = {
                 id: randomID(),
-                textField: arg.textField,
-                author: arg.author,
-                post: arg.post
+                ...arg.data
             }
 
             commentData.push(comment);
