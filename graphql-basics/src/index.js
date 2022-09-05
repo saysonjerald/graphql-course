@@ -1,4 +1,4 @@
-import {createServer} from "@graphql-yoga/node"
+import {createServer, GraphQLYogaError} from "@graphql-yoga/node"
 import {v4 as randomID} from 'uuid'
 
 // Scalar Types: Strings, Boolean, Int, Float, ID, - can store single value
@@ -13,19 +13,19 @@ const usersData = [
     {
         id: '2',
         name: 'Ian Nogas',
-        email: 'example@gmail.com',
+        email: 'example1@gmail.com',
         age: 21,
     },
     {
         id: '3',
         name: 'Eugene Mosqueda',
-        email: 'example@gmail.com',
+        email: 'example2@gmail.com',
         age: 26,
     },
     {
         id: '4',
         name: 'Roberto Dallas',
-        email: 'example@gmail.com',
+        email: 'example3@gmail.com',
         age: 72,
     },
 
@@ -36,21 +36,21 @@ const postData = [
         id: '201',
         title: 'Art of War',
         body: 'This is the introduction of the art of war',
-        published: "06-02-1934",
+        published: false,
         author: '1'
     },
     {
         id: '202',
         title: 'The Lorem Ipsum',
         body:  "Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus consequuntur ut, eaque veritatis tenetur expedita facilis necessitatibus odio nulla quam.",
-        published: "07-02-1943",
+        published: true,
         author: '2'
     },
     {
         id: '203',
         title: 'The Read Power of Low',
         body: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea, accusamus!",
-        published: "12-02-2014",
+        published: true,
         author: '3'
     }
 ];
@@ -91,6 +91,12 @@ const typeDefs = `
         comments: [Comment!]!
     }
 
+    type Mutation {
+        createUser(name: String!, email: String!, age: Int!): User!
+        createPost(title: String!, body: String!, published: Boolean!, author: ID!): Post!
+        createComment(textField: String!, author: ID!, post: ID!): Comment!
+    }
+
     type User {
         id: ID!
         name: String!
@@ -104,7 +110,7 @@ const typeDefs = `
         id: ID!
         title: String!
         body: String!
-        published: String!
+        published: Boolean!
         author: User!
         comments: [Comment!]!
     }
@@ -158,6 +164,68 @@ const resolvers = {
         },
         comments: (parent, arg) => {
             return commentData;
+        }
+    },
+    Mutation: {
+        createUser: (parent, arg, ctx, info) => {
+            const isUserExist = usersData.some((user)=> user.email === arg.email);
+
+            if(isUserExist) {
+                throw new GraphQLYogaError("User already exist 😢.");
+            }
+
+            const user = {
+                id: randomID(),
+                name: arg.name,
+                email: arg.email,
+                age: arg.age,
+            }
+
+            usersData.push(user);
+            return user;
+        },
+        createPost: (parent, arg, ctx, info) => {
+            const isAuthorExist = usersData.some((user) => user.id === arg.author);
+            if(!isAuthorExist) {
+                throw new GraphQLYogaError("Author didn't exist! 💥");
+            }
+            
+            const post = {
+                id: randomID(),
+                title: arg.title,
+                body: arg.body,
+                published: arg.published,
+                author: arg.author
+            }
+
+            postData.push(post);
+
+            return post;
+        },
+        createComment: (parent, arg) => {
+            const isAuthorExist = usersData.some((user) => user.id ===  arg.author);
+            const isPostExist = postData.some((post) => {
+                return post.published && post.id === arg.post;
+            });
+
+            if(!isAuthorExist) {
+                throw new GraphQLYogaError("User didn't exist!");
+            }
+
+            if(!isPostExist) {
+                throw new GraphQLYogaError("Post didn't exist!");
+            }
+           
+            const comment = {
+                id: randomID(),
+                textField: arg.textField,
+                author: arg.author,
+                post: arg.post
+            }
+
+            commentData.push(comment);
+
+            return comment;
         }
     },
     Post: {
