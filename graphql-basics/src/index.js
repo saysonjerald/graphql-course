@@ -3,7 +3,7 @@ import {v4 as randomID} from 'uuid'
 
 // Scalar Types: Strings, Boolean, Int, Float, ID, - can store single value
 
-const usersData = [
+let usersData = [
     {
         id: '1',
         name: 'Jerald Sayson',
@@ -31,7 +31,7 @@ const usersData = [
 
 ] 
 
-const postData = [
+let postData = [
     {
         id: '201',
         title: 'Art of War',
@@ -55,7 +55,7 @@ const postData = [
     }
 ];
 
-const commentData = [
+let commentData = [
     {
         id: 100,
         textField: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Neque, reprehenderit!",
@@ -113,8 +113,11 @@ const typeDefs = `
 
     type Mutation {
         createUser(data: CreateUserInput): User!
+        deleteUser(id: ID!): User!
         createPost(data: CreatePostInput): Post!
+        deletePost(id: ID!): Post!
         createComment(data: CreateCommentInput): Comment!
+        deleteComment(id: ID!): Comment!
     }
 
     type User {
@@ -202,6 +205,29 @@ const resolvers = {
             usersData.push(user);
             return user;
         },
+        deleteUser: (parent, arg, ctx, info) => {
+            const userIndex = usersData.findIndex((user) => user.id === arg.id);
+
+            if(userIndex === -1) {
+                throw new GraphQLYogaError("User not found!");
+            }
+
+            const deleteUsers = usersData.splice(userIndex, 1);
+
+            postData = postData.filter((post) => {
+                const match = post.author === arg.id;
+
+                if(match) {
+                    commentData = commentData.filter((comment) => comment.post !== post.post)
+                }
+
+                return !match;
+            })
+
+            commentData = commentData.filter((comment) => comment.author !== arg.id);
+
+            return deleteUsers[0];
+        },
         createPost: (parent, arg, ctx, info) => {
             const isAuthorExist = usersData.some((user) => user.id === arg.author);
             if(!isAuthorExist) {
@@ -216,6 +242,19 @@ const resolvers = {
             postData.push(post);
 
             return post;
+        },
+        deletePost: (parent, arg) => {
+            const postIndex = postData.findIndex((post) => post.id === arg.id);
+
+            if(postIndex === -1) {
+                throw new GraphQLYogaError("Post not found!");
+            }
+
+            const deletePosts = postData.splice(postIndex, 1);
+
+            commentData = commentData.filter((comment) => comment.post !== arg.id);
+
+            return deletePosts[0];
         },
         createComment: (parent, arg) => {
             const isAuthorExist = usersData.some((user) => user.id ===  arg.data.author);
@@ -239,6 +278,19 @@ const resolvers = {
             commentData.push(comment);
 
             return comment;
+        },
+        deleteComment: (parent, arg) => {
+            const commentIndex = commentData.findIndex((comment) => comment.id === arg.id);
+
+            if(commentData === -1) {
+                throw new GraphQLYogaError("Comment not found!");
+            }
+
+            const deletedComments = commentData.splice(commentIndex, 1);
+
+            commentData = commentData.filter((comment) => comment.id !== arg.id);
+
+            return deletedComments[0];
         }
     },
     Post: {
