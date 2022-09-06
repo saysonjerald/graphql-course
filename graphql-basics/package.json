@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/index.js --exec babel-node"
+    "start": "nodemon src/index.js --ext js,graphql --exec babel-node"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@graphql-tools/schema": "^9.0.3",
     "@graphql-yoga/node": "^2.13.12",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
