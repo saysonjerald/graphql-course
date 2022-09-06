@@ -1,3 +1,6 @@
+import {GraphQLYogaError} from '@graphql-yoga/node'
+import {v4 as randomID} from 'uuid';
+
 const Mutation = {
     createUser: (parent, arg, {db}, info) => {
         const isUserExist = db.usersData.some((user)=> user.email === arg.data.email);
@@ -12,6 +15,34 @@ const Mutation = {
         }
 
         db.usersData.push(user);
+        return user;
+    },
+    updateUser: (parent, args, {db}) => {
+        const {id, data} = args;
+        const user = db.usersData.find((user) => user.id === id);
+
+        if(!user) {
+            throw new GraphQLYogaError("User not found");
+        }   
+
+        if(typeof data.email === 'string') {
+            const emailTaken = db.usersData.some((user) => user.email === data.email);
+
+            if(emailTaken) {
+                throw new GraphQLYogaError("Email taken");
+            };
+
+            user.email = data.email;
+        }
+
+        if(typeof data.name === 'string'){
+            user.name = data.name;
+        }
+
+        if(typeof data.age !== 'undefined'){
+            user.age = data.age;
+        }
+
         return user;
     },
     deleteUser: (parent, arg, {db}, info) => {
@@ -52,6 +83,28 @@ const Mutation = {
 
         return post;
     },
+    updatePost: (parent, arg, {db}) => {
+        const {id, data} = arg;
+        const post = db.postData.find((post) => post.id === id);
+
+        if(!post) {
+            throw new GraphQLYogaError("Post not found");
+        }
+
+        if(typeof data.title === 'string'){
+            post.title = data.title
+        }
+
+        if(typeof data.body === 'string') {
+            post.body = data.body;
+        }
+
+        if(typeof data.published === 'boolean'){
+            post.published = data.published;
+        }
+
+        return post;
+    },
     deletePost: (parent, arg, {db}) => {
         const postIndex = db.postData.findIndex((post) => post.id === arg.id);
 
@@ -85,6 +138,20 @@ const Mutation = {
         }
 
         db.commentData.push(comment);
+
+        return comment;
+    },
+    updateComment: (parent, arg, {db}) => {
+        const {id, data} = arg;
+        const comment = db.commentData.find((comment) => comment.id == id);
+
+        if(!comment) {
+            throw new GraphQLYogaError("Comment not found!");
+        }
+
+        if(typeof data.textField === 'string'){
+            comment.textField = data.textField;
+        }
 
         return comment;
     },

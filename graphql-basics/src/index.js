@@ -1,6 +1,5 @@
-import {createServer, GraphQLYogaError} from "@graphql-yoga/node";
+import {createServer} from "@graphql-yoga/node";
 import { makeExecutableSchema } from "@graphql-tools/schema";
-import {v4 as randomID} from 'uuid';
 import schema from './schema';
 import db from './db'; 
 import Comment from './resolvers/Comment'

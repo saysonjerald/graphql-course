@@ -1,6 +1,5 @@
-const typeDefs = 
-  `
-  type Query {
+const typeDef = `
+type Query {
   post: Post!
   user: User!
   users(query: String): [User!]!
@@ -14,11 +13,24 @@ input CreateUserInput {
   age: Int!
 }
 
+input UpdateUserInput {
+  name: String
+  email: String
+  age: Int
+}
+
+
 input CreatePostInput {
   title: String!
   body: String!
   published: Boolean!
   author: ID!
+}
+
+input UpdatePostInput {
+  title: String
+  body: String
+  published: Boolean
 }
 
 input CreateCommentInput {
@@ -27,12 +39,19 @@ input CreateCommentInput {
   post: ID!
 }
 
+input UpdateCommentInput {
+  textField: String
+}
+ 
 type Mutation {
-  createUser(data: CreateUserInput): User!
+  createUser(data: CreateUserInput!): User!
+  updateUser(id: ID!, data: UpdateUserInput!): User!
   deleteUser(id: ID!): User!
-  createPost(data: CreatePostInput): Post!
+  createPost(data: CreatePostInput!): Post!
+  updatePost(id: ID!, data: UpdatePostInput!): Post!
   deletePost(id: ID!): Post!
-  createComment(data: CreateCommentInput): Comment!
+  createComment(data: CreateCommentInput!): Comment!
+  updateComment(id: ID!, data: UpdateCommentInput!): Comment!
   deleteComment(id: ID!): Comment!
 }
 
@@ -59,6 +78,6 @@ type Comment {
   textField: String!
   author: User!
   post: Post!
-} `
+}`
 
-export {typeDefs as default}
+export {typeDef as default }
