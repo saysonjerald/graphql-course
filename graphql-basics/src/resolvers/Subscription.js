@@ -12,6 +12,12 @@ const Subscription = {
             return pubsub.subscribe(`comment ${postId}`);
         },
         resolve: (payload) => payload,
+    },
+    post: {
+        subscribe: (parent, args, {pubsub}) => {
+            return pubsub.subscribe('post');
+        }, 
+        resolve: (payload) => payload,
     }
 }
 

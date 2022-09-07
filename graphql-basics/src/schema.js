@@ -45,7 +45,8 @@ input UpdateCommentInput {
 
 type Subscription {
   count: Int!
-  comment(postId: ID!): Comment!
+  comment(postId: ID!): CommentSubscriptionPayload!
+  post: PostSubscriptionPayload!
 }
  
 type Mutation {
@@ -83,6 +84,18 @@ type Comment {
   textField: String!
   author: User!
   post: Post!
-}`
+}
+
+type PostSubscriptionPayload {
+  mutation: String!
+  data: Post!
+}
+
+type CommentSubscriptionPayload {
+  mutation: String!
+  data: Comment!
+}
+
+`
 
 export {typeDef as default }

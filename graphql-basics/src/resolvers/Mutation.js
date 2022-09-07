@@ -2,7 +2,7 @@ import {GraphQLYogaError} from '@graphql-yoga/node'
 import {v4 as randomID} from 'uuid';
 
 const Mutation = {
-    createUser: (parent, arg, {db}, info) => {
+    createUser: (parent, arg, {db, pubsub}, info) => {
         const isUserExist = db.usersData.some((user)=> user.email === arg.data.email);
 
         if(isUserExist) {
@@ -68,24 +68,33 @@ const Mutation = {
 
         return deleteUsers[0];
     },
-    createPost: (parent, arg, {db}, info) => {
-        const isAuthorExist = db.usersData.some((user) => user.id === arg.author);
+    createPost: (parent, arg, {db, pubsub}, info) => {
+        console.log(arg.data.author);
+        const isAuthorExist = db.usersData.some((user) => user.id === arg.data.author);
         if(!isAuthorExist) {
             throw new GraphQLYogaError("Author didn't exist! 💥");
         }
         
         const post = {
             id: randomID(),
-            ...arg
+            ...arg.data
         }
 
         db.postData.push(post);
 
+        if(arg.data.published) {
+            pubsub.publish('post' , {
+                mutation: 'CREATED',
+                data: post,
+            });
+        }
+
         return post;
     },
-    updatePost: (parent, arg, {db}) => {
+    updatePost: (parent, arg, {db, pubsub}) => {
         const {id, data} = arg;
         const post = db.postData.find((post) => post.id === id);
+        const originalPost = {...post};
 
         if(!post) {
             throw new GraphQLYogaError("Post not found");
@@ -101,22 +110,46 @@ const Mutation = {
 
         if(typeof data.published === 'boolean'){
             post.published = data.published;
+
+            if(originalPost.published && !post.published) {
+                pubsub.publish('post', {
+                    mutation: 'DELETED',
+                    data: originalPost,
+                })
+            } else if(!originalPost.published && post.published) {
+                pubsub.publish('post', {
+                    mutation: 'CREATED',
+                    data: post
+                })
+            } 
+        } else if(post.published) {
+                pubsub.publish('post', {
+                    mutation: 'UPDATED',
+                    data: post
+                });
         }
 
         return post;
     },
-    deletePost: (parent, arg, {db}) => {
+    deletePost: (parent, arg, {db, pubsub}) => {
         const postIndex = db.postData.findIndex((post) => post.id === arg.id);
 
         if(postIndex === -1) {
             throw new GraphQLYogaError("Post not found!");
         }
 
-        const deletePosts = db.postData.splice(postIndex, 1);
+        const [deletePosts] = db.postData.splice(postIndex, 1);
 
         db.commentData = db.commentData.filter((comment) => comment.post !== arg.id);
 
-        return deletePosts[0];
+        if(deletePosts.published) {
+            pubsub.publish('post', {
+                mutation: 'DELETED',
+                data: deletePosts,
+            })
+        }
+
+        return deletePosts;
     },
     createComment: (parent, arg, {db, pubsub}) => {
         const isAuthorExist = db.usersData.some((user) => user.id ===  arg.data.author);
@@ -138,11 +171,16 @@ const Mutation = {
         }
 
         db.commentData.push(comment);
-        pubsub.publish(`comment ${arg.data.post}`, comment);
+
+        pubsub.publish(`comment ${arg.data.post}`, {
+            mutation: 'CREATED',
+            data: comment
+        })
+
 
         return comment;
     },
-    updateComment: (parent, arg, {db}) => {
+    updateComment: (parent, arg, {db, pubsub}) => {
         const {id, data} = arg;
         const comment = db.commentData.find((comment) => comment.id == id);
 
@@ -154,20 +192,31 @@ const Mutation = {
             comment.textField = data.textField;
         }
 
+        pubsub.publish(`comment ${comment.post}`, {
+            mutation: 'UPDATED',
+            data: comment
+        })
+
         return comment;
     },
-    deleteComment: (parent, arg, {db}) => {
+    deleteComment: (parent, arg, {db, pubsub}) => {
         const commentIndex = db.commentData.findIndex((comment) => comment.id === arg.id);
 
         if(db.commentData === -1) {
             throw new GraphQLYogaError("Comment not found!");
         }
 
-        const deletedComments = db.commentData.splice(commentIndex, 1);
+        const [deletedComments] = db.commentData.splice(commentIndex, 1);
 
         db.commentData = db.commentData.filter((comment) => comment.id !== arg.id);
 
-        return deletedComments[0];
+        pubsub.publish(`comment ${deletedComments.post}`, {
+            mutation: 'DELETED',
+            data: deletedComments
+        })
+
+
+        return deletedComments;
     }
 }
 
