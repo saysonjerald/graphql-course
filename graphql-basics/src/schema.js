@@ -42,6 +42,11 @@ input CreateCommentInput {
 input UpdateCommentInput {
   textField: String
 }
+
+type Subscription {
+  count: Int!
+  comment(postId: ID!): Comment!
+}
  
 type Mutation {
   createUser(data: CreateUserInput!): User!
